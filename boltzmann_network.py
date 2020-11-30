@@ -8,7 +8,6 @@ Created on Sun Jul 29 08:40:49 2018
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
-from lattice import Lattice2D
 from typing import List
 
 ###
@@ -60,10 +59,6 @@ class BoltzmannNetwork(object):
     exp1: np.ndarray
     exp1: np.ndarray
 
-    # TODO: get rid of the asyn attribute
-    # here they are intializing the weights and stationary energies
-    # this function is closer to an initializer than a training function
-    # the training happens in the predict and run methods
     def train_weights(self, train_data):
         print("Start to train weights...")
         num_data =  len(train_data)
@@ -84,6 +79,7 @@ class BoltzmannNetwork(object):
         diagW = np.diag(np.diag(W))
         W = W - diagW
         W /= num_data
+        # self.energy_attract =
         
         self.W = W 
     
@@ -101,6 +97,7 @@ class BoltzmannNetwork(object):
         # Define predict list
         predicted = []
         # this for loops all the example images
+        # the training happens in the predict and run methods
         # copied_data[i] is a 1xn array
         for i in range(len(data)):
             struct_data = copied_data[i]
@@ -119,12 +116,14 @@ class BoltzmannNetwork(object):
         
         # Iteration
         for i in range(self.num_iter):
-            for j in range(500):
+            print(s)
+            for j in range(15):
                 # Select random neuron
                 idx = np.random.randint(0, self.num_neuron) 
                 # This line is the previous activation function
 
                 # The new way for computing v and s
+                s = np.sign(self.W @ s - self.threshold)
                 delta_energy, original = self.update_lattice(s, idx) 
             
             # Compute new state energy
