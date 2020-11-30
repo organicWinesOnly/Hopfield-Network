@@ -59,12 +59,10 @@ class BoltzmannNetwork(object):
     def train_weights(self, train_data):
         print("Start to train weights...")
         num_data =  len(train_data)
-        # num_data =  len(train_data)
         self.num_neuron = train_data[0].size
         
         # initialize weights
         W = np.zeros((self.num_neuron, self.num_neuron))
-        # this wont work since Lattice2D does not have an iterative method
         rho = np.sum([np.sum(t) for t in train_data]) / (num_data*self.num_neuron)
         
         # Hebb rule
@@ -79,6 +77,7 @@ class BoltzmannNetwork(object):
         # self.energy_attract =
         
         self.W = W 
+        self.count = 0
     
     def predict(self, data: List[np.ndarray], num_iter=20, threshold=0, asyn=True):
         # in the orginal code data is a list containing flattened arrays
@@ -94,8 +93,6 @@ class BoltzmannNetwork(object):
         # Define predict list
         predicted = []
         # this for loops all the example images
-        # the training happens in the predict and run methods
-        # copied_data[i] is a 1xn array
         for i in range(len(data)):
             struct_data = copied_data[i]
             predicted.append(self._run(struct_data))
@@ -114,6 +111,7 @@ class BoltzmannNetwork(object):
         # Iteration
         for i in range(self.num_iter):
             for j in range(15):
+                self.count +=1
                 # Select random neuron
                 idx = np.random.randint(0, self.num_neuron) 
                 # This line is the previous activation function

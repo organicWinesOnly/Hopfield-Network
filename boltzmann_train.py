@@ -91,6 +91,7 @@ def main():
     print("Show prediction results...")
     plot(data, test, predicted)
     print("Show network weights matrix...")
+    print("Number of Epochs %i: ", model.count)
     #model.plot_weights()
 
 if __name__ == '__main__':

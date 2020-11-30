@@ -30,6 +30,7 @@ class HopfieldNetwork(object):
         W /= num_data
         
         self.W = W 
+        self.count = 0
     
     def predict(self, data, num_iter=20, threshold=0, asyn=False):
         print("Start to predict...")
@@ -80,6 +81,7 @@ class HopfieldNetwork(object):
             # Iteration
             for i in range(self.num_iter):
                 for j in range(100):
+                    self.count += 1
                     # Select random neuron
                     idx = np.random.randint(0, self.num_neuron) 
                     # Update s
