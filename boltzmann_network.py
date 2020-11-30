@@ -10,8 +10,6 @@ from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 from typing import List
 
-###
-
 def neighbours(input_data: np.ndarray, site: int) -> List[np.ndarray]:
     """Return neighbouring spin values alng with their indicies
     [<left>, <right>, <above> , <below>].
@@ -38,7 +36,6 @@ def neighbours(input_data: np.ndarray, site: int) -> List[np.ndarray]:
     idx = np.array([left, right, up, down])
 
     return [values, idx]
-#########
 
 class BoltzmannNetwork(object):      
     """ Run a Hopfield Neural Network
@@ -116,7 +113,6 @@ class BoltzmannNetwork(object):
         
         # Iteration
         for i in range(self.num_iter):
-            print(s)
             for j in range(15):
                 # Select random neuron
                 idx = np.random.randint(0, self.num_neuron) 
@@ -130,8 +126,8 @@ class BoltzmannNetwork(object):
             e_new = e + delta_energy
             
             # s is converged
-            #if e == e_new:
-            #    return s
+            if np.abs(delta_energy) < 1:
+                return s
             # Update energy
             e = e_new
         return s

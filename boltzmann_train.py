@@ -15,9 +15,6 @@ from skimage.transform import resize
 import boltzmann_network as bn
 
 # Utils
-# TODO: (line 16 of the main function) Make the test input a Lattice2D object
-# It will probably be better to do this in another file so it wont effect the
-# original program
 def get_corrupted_input(input, corruption_level):
     corrupted = np.copy(input)
     inv = np.random.binomial(n=1, p=corruption_level, size=len(input))
@@ -90,7 +87,7 @@ def main():
     # Generate testset
     test = [get_corrupted_input(d, 0.3) for d in data]
 
-    predicted = model.predict(test, num_iter=4, threshold=0, asyn=False)
+    predicted = model.predict(test, num_iter=40, threshold=0, asyn=False)
     print("Show prediction results...")
     plot(data, test, predicted)
     print("Show network weights matrix...")
