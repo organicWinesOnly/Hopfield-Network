@@ -87,7 +87,7 @@ def main():
     # Generate testset
     test = [get_corrupted_input(d, 0.3) for d in data]
 
-    predicted = model.predict(test, num_iter=40, threshold=0, asyn=False)
+    predicted = model.predict(test, num_iter=10, threshold=0, asyn=False)
     print("Show prediction results...")
     plot(data, test, predicted)
     print("Show network weights matrix...")

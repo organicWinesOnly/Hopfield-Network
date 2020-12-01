@@ -8,6 +8,7 @@ Created on Sun Jul 29 08:40:49 2018
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
+import scipy.spatial as ss
 
 class HopfieldNetwork(object):      
     def train_weights(self, train_data):
@@ -37,6 +38,7 @@ class HopfieldNetwork(object):
         self.num_iter = num_iter
         self.threshold = threshold
         self.asyn = asyn
+        self.count = []
         
         # Copy to avoid call by reference 
         copied_data = np.copy(data)
@@ -54,21 +56,25 @@ class HopfieldNetwork(object):
             """
             # Compute initial state energy
             s = init_s
-
             e = self.energy(s)
+            counter = 0
+            original = np.copy(s)
             
             # Iteration
             for i in range(self.num_iter):
+                counter += 1
                 # Update s
                 s = np.sign(self.W @ s - self.threshold)
                 # Compute new state energy
                 e_new = self.energy(s)
                 
                 # s is converged
-                if e == e_new:
+                if ss.distance.hamming(original, s) > 0.95:
+                    self.count.append(counter)
                     return s
                 # Update energy
                 e = e_new
+            self.count.append(counter)
             return s
         else:
             """
@@ -77,11 +83,13 @@ class HopfieldNetwork(object):
             # Compute initial state energy
             s = init_s
             e = self.energy(s)
+            count = 0
             
             # Iteration
             for i in range(self.num_iter):
+                original = np.copy(s)
+                counter += 1
                 for j in range(100):
-                    self.count += 1
                     # Select random neuron
                     idx = np.random.randint(0, self.num_neuron) 
                     # Update s
@@ -91,10 +99,12 @@ class HopfieldNetwork(object):
                 e_new = self.energy(s)
                 
                 # s is converged
-                if e == e_new:
+                if ss.distance.hamming(original, s) > 0.95:
+                    self.count.append(counter)
                     return s
                 # Update energy
                 e = e_new
+            self.count.append(counter)
             return s
     
     

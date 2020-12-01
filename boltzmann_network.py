@@ -9,12 +9,16 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 from typing import List
+import scipy.spatial as ss
+from network import HopfieldNetwork
+
+ERROR = 1e-5
 
 def neighbours(input_data: np.ndarray, site: int) -> List[np.ndarray]:
-    """Return neighbouring spin values alng with their indicies
+    """Return neighbouring spin values along with their indices
     [<left>, <right>, <above> , <below>].
 
-    Helliac Periodic Boundary conditions are applied. Asuuming 
+    Helliac Periodic Boundary conditions are applied. Assuming 
 
 
     === Parameters ===
@@ -37,7 +41,7 @@ def neighbours(input_data: np.ndarray, site: int) -> List[np.ndarray]:
 
     return [values, idx]
 
-class BoltzmannNetwork(object):      
+class BoltzmannNetwork(HopfieldNetwork):      
     """ Run a Hopfield Neural Network
 
     ==== Attributes ===
@@ -56,48 +60,6 @@ class BoltzmannNetwork(object):
     exp1: np.ndarray
     exp1: np.ndarray
 
-    def train_weights(self, train_data):
-        print("Start to train weights...")
-        num_data =  len(train_data)
-        self.num_neuron = train_data[0].size
-        
-        # initialize weights
-        W = np.zeros((self.num_neuron, self.num_neuron))
-        rho = np.sum([np.sum(t) for t in train_data]) / (num_data*self.num_neuron)
-        
-        # Hebb rule
-        for i in range(num_data):
-            t = train_data[i] - rho
-            W += np.outer(t, t)
-        
-        # Make diagonal element of W into 0
-        diagW = np.diag(np.diag(W))
-        W = W - diagW
-        W /= num_data
-        # self.energy_attract =
-        
-        self.W = W 
-        self.count = 0
-    
-    def predict(self, data: List[np.ndarray], num_iter=20, threshold=0, asyn=True):
-        # in the orginal code data is a list containing flattened arrays
-        # changing it to a list of lattices
-        print("Start to predict...")
-        self.num_iter = num_iter
-        self.threshold = threshold
-        self.asyn = asyn  # not important for our use
-        
-        # list aliasing
-        copied_data = np.copy(data)
-        
-        # Define predict list
-        predicted = []
-        # this for loops all the example images
-        for i in range(len(data)):
-            struct_data = copied_data[i]
-            predicted.append(self._run(struct_data))
-        return predicted
-    
     def _run(self, init_s: np.ndarray):
         """ Asynchronous update
 
@@ -107,27 +69,28 @@ class BoltzmannNetwork(object):
         # Compute initial state energy
         s = init_s
         e = self.energy(s)
+        counter = 0
         
         # Iteration
         for i in range(self.num_iter):
+            counter += 1
+            original = np.copy(s)
             for j in range(15):
-                self.count +=1
                 # Select random neuron
                 idx = np.random.randint(0, self.num_neuron) 
-                # This line is the previous activation function
-
-                # The new way for computing v and s
                 s = np.sign(self.W @ s - self.threshold)
-                delta_energy, original = self.update_lattice(s, idx) 
+                delta_energy, _ = self.update_lattice(s, idx) 
             
             # Compute new state energy
             e_new = e + delta_energy
             
             # s is converged
-            if np.abs(delta_energy) < 1:
+            if ss.distance.hamming(original, s) > 0.95:
+                self.count.append(counter)
                 return s
             # Update energy
             e = e_new
+        self.count.append(counter)
         return s
     
     def _acceptance(self, original: np.ndarray, site: int):
@@ -162,14 +125,3 @@ class BoltzmannNetwork(object):
 
         return accept[1], original
     
-    def energy(self, s):
-        return -0.5 * s @ self.W @ s + np.sum(s * self.threshold)
-
-    def plot_weights(self):
-        plt.figure(figsize=(6, 5))
-        w_mat = plt.imshow(self.W, cmap=cm.coolwarm)
-        plt.colorbar(w_mat)
-        plt.title("Network Weights")
-        plt.tight_layout()
-        plt.savefig("weights.png")
-        plt.show()
