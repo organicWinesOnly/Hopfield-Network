@@ -106,3 +106,4 @@ venv.bak/
 
 # backup files
 .backup/
+result.png
